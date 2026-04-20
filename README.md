@@ -1,78 +1,120 @@
-# build-harbor-aarch64
-Build an offline-deployable Harbor version for ARM64 architecture.
+# Harbor
 
-How to get the harbor-offline-installer-aarch64 package?
+[![CI](https://github.com/goharbor/harbor/workflows/CI/badge.svg?branch=main&event=push)](https://github.com/goharbor/harbor/actions?query=event%3Apush+branch%3Amain+workflow%3ACI+)
+[![Coverage Status](https://codecov.io/gh/goharbor/harbor/branch/main/graph/badge.svg)](https://codecov.io/gh/goharbor/harbor)
+[![Go Report Card](https://goreportcard.com/badge/github.com/goharbor/harbor)](https://goreportcard.com/report/github.com/goharbor/harbor)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2095/badge)](https://bestpractices.coreinfrastructure.org/projects/2095)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/792fe1755edc4d6e91f4c3469f553389)](https://www.codacy.com/gh/goharbor/harbor/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=goharbor/harbor&amp;utm_campaign=Badge_Grade)
+![Code scanning - action](https://github.com/goharbor/harbor/workflows/Code%20scanning%20-%20action/badge.svg)
+[![Nightly Status](https://us-central1-eminent-nation-87317.cloudfunctions.net/harbor-nightly-result)](https://www.googleapis.com/storage/v1/b/harbor-nightly/o)
+![CONFORMANCE_TEST](https://github.com/goharbor/harbor/workflows/CONFORMANCE_TEST/badge.svg)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgoharbor%2Fharbor.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgoharbor%2Fharbor?ref=badge_shield)
+[![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/harbor)](https://artifacthub.io/packages/helm/harbor/harbor)
+</br>
 
-### Option1 （方法一）
-直接从该项目的Release页面下载完整的离线包文件harbor-offline-installer-aarch64-v2.13.0.tgz
+|![notification](https://raw.githubusercontent.com/goharbor/website/master/docs/img/readme/bell-outline-badged.svg)Community Meeting|
+|------------------|
+|The Harbor Project holds bi-weekly community calls in two different timezones. To join the community calls or to watch previous meeting notes and recordings, please visit the [meeting schedule](https://github.com/goharbor/community/blob/master/MEETING_SCHEDULE.md).|
 
-### Option2 （方法二）
-下载离线镜像包
-```
-docker pull alanpeng/harbor_images_aarch64:v2.13.0
-```
+</br> </br>
 
-创建一个新的容器实例
-```
-TEMP_CONTAINER_ID=$(docker create alanpeng/harbor_images_aarch64:v2.13.0 /bin/true)
-```
+**Note**: The `main` branch may be in an *unstable or even broken state* during development.
+Please use [releases](https://github.com/goharbor/harbor/releases) instead of the `main` branch in order to get a stable set of binaries.
 
-从容器中拷贝文件
-```
-docker cp $TEMP_CONTAINER_ID:/harbor-offline-installer-aarch64.tgz ./harbor-offline-installer-aarch64.tgz
-```
+<img alt="Harbor" src="https://raw.githubusercontent.com/goharbor/website/master/docs/img/readme/harbor_logo.png">
 
-删除容器实例
-```
-docker rm $TEMP_CONTAINER_ID
-```
-### 接下来便是正常安装过程了
+Harbor is an open source trusted cloud native registry project that stores, signs, and scans content. Harbor extends the open source Docker Distribution by adding the functionalities usually required by users such as security, identity and management. Having a registry closer to the build and run environment can improve the image transfer efficiency. Harbor supports replication of images between registries, and also offers advanced security features such as user management, access control and activity auditing.
 
-以正常方式安装Harbor ARM64 Version
-```
-tar zxf harbor-offline-installer-aarch64.tgz
-cd harbor
-cp harbor.yml.tmpl harbor.yml
-```
+Harbor is hosted by the [Cloud Native Computing Foundation](https://cncf.io) (CNCF). If you are an organization that wants to help shape the evolution of cloud native technologies, consider joining the CNCF. For details about whose involved and how Harbor plays a role, read the CNCF
+[announcement](https://www.cncf.io/blog/2018/07/31/cncf-to-host-harbor-in-the-sandbox/).
 
-适当修改harbor.yml文件内容
+## Features
 
-vi harbor.yml
+* **Cloud native registry**: With support for both container images and [Helm](https://helm.sh) charts, Harbor serves as registry for cloud native environments like container runtimes and orchestration platforms.
+* **Role based access control**: Users access different repositories through 'projects' and a user can have different permission for images or Helm charts under a project.
+* **Policy based replication**: Images and charts can be replicated (synchronized) between multiple registry instances based on policies with using filters (repository, tag and label). Harbor automatically retries a replication if it encounters any errors. This can be used to assist loadbalancing, achieve high availability, and facilitate multi-datacenter deployments in hybrid and multi-cloud scenarios.
+* **Vulnerability Scanning**: Harbor scans images regularly for vulnerabilities and has policy checks to prevent vulnerable images from being deployed.
+* **LDAP/AD support**: Harbor integrates with existing enterprise LDAP/AD for user authentication and management, and supports importing LDAP groups into Harbor that can then be given permissions to specific projects.
+* **OIDC support**: Harbor leverages OpenID Connect (OIDC) to verify the identity of users authenticated by an external authorization server or identity provider. Single sign-on can be enabled to log into the Harbor portal.
+* **Image deletion & garbage collection**: System admin can run garbage collection jobs so that images(dangling manifests and unreferenced blobs) can be deleted and their space can be freed up periodically.
+* **Notary**: Support signing container images using Docker Content Trust (leveraging Notary) for guaranteeing authenticity and provenance.  In addition, policies that prevent unsigned images from being deployed can also be activated.
+* **Graphical user portal**: User can easily browse, search repositories and manage projects.
+* **Auditing**: All the operations to the repositories are tracked through logs.
+* **RESTful API**: RESTful APIs are provided to facilitate administrative operations, and are easy to use for integration with external systems. An embedded Swagger UI is available for exploring and testing the API.
+* **Easy deployment**: Harbor can be deployed via Docker compose as well Helm Chart, and a Harbor Operator was added recently as well.
 
-```
-install.sh
-```
+## Architecture
 
-![Harbor-v2.13.0-Aarch64](https://github.com/wise2c-devops/build-harbor-aarch64/assets/3273357/49ce7cc3-918e-421c-86d9-2c06e9b42bb3)
+For learning the architecture design of Harbor, check the document [Architecture Overview of Harbor](https://github.com/goharbor/harbor/wiki/Architecture-Overview-of-Harbor).
 
-### 该项目工作原理（如何解决官方项目无法直接用于构建ARM64架构镜像?）
+## API
 
-在我们手头没有ARM设备的时候，如何构建完全基于官方代码的ARM64架构发现包？
+* Harbor RESTful API: The APIs for most administrative operations of Harbor and can be used to perform integrations with Harbor programmatically.
+  * Part 1: [New or changed APIs](https://editor.swagger.io/?url=https://raw.githubusercontent.com/goharbor/harbor/main/api/v2.0/swagger.yaml)
 
-在众多免费的SaaS化的CI服务中，对ARM64架构支持体验最好的平台，我曾经用过TravisCI、GitlabCI、CircleCI，前两者已经不完全免费，因此一直都在用CircleCI构建我的工作相关镜像
+## Install & Run
 
-对于如何使用CircleCI，其实是和TravisCI这样的平台极其类似的，具体可参考这篇文章内容：https://mp.weixin.qq.com/s/PlBvzDlPQbnYTmyQoSLD5Q
+**System requirements:**
 
-如果你希望自己及时构建自己的Harbor ARM64镜像，最简单的方法是fork本项目到你自己github账号，然后修改代码里的镜像名称前缀 alanpeng/ 为你自己的即可。
+**On a Linux host:** docker 20.10.10-ce+ and docker-compose 1.18.0+ .
 
-涉及变更的文件有：
+Download binaries of **[Harbor release ](https://github.com/goharbor/harbor/releases)** and follow **[Installation & Configuration Guide](https://goharbor.io/docs/latest/install-config/)** to install Harbor.
 
-![image](https://github.com/user-attachments/assets/b4a07cbb-5d7f-4c36-9d6c-e175cfa427cc)
+If you want to deploy Harbor on Kubernetes, please use the **[Harbor chart](https://github.com/goharbor/harbor-helm)**.
 
-然后注册并登录你的CircleCI账号，同步你的github项目后对项目进行设置：
+Refer to the **[documentation](https://goharbor.io/docs/)** for more details on how to use Harbor.
 
-![image](https://github.com/user-attachments/assets/cfbac344-5bd8-42d5-a245-be0b7c03237d)
+## OCI Distribution Conformance Tests
 
-先注册docker hub账号，也可以是国内比如阿里云镜像仓库账号，然后做好设定：
+Check the OCI distribution conformance tests [report](https://storage.googleapis.com/harbor-conformance-test/report.html) of Harbor.
 
-![image](https://github.com/user-attachments/assets/5d8e91ee-f111-4f93-9fa2-5eec17155965)
+## Compatibility
 
-后面你只需要针对整个项目里的Harbor的版本变化做更新即可自动获得最新版本的镜像了。
+The [compatibility list](https://goharbor.io/docs/edge/install-config/harbor-compatibility-list/) document provides compatibility information for the Harbor components.
 
-![image](https://github.com/user-attachments/assets/7e7a6b6a-6b8b-40ac-97f2-f1c7a55efb98)
+* [Replication adapters](https://goharbor.io/docs/edge/install-config/harbor-compatibility-list/#replication-adapters)
+* [OIDC adapters](https://goharbor.io/docs/edge/install-config/harbor-compatibility-list/#oidc-adapters)
+* [Scanner adapters](https://goharbor.io/docs/edge/install-config/harbor-compatibility-list/#scanner-adapters)
 
-每次提交代码变更，CircleCI会自动开始构建，如果失败可查看日志调整脚本或相关代码即可：
+## Community
 
-![image](https://github.com/user-attachments/assets/8afb596c-8695-49d0-a4cd-07dc46f86b3d)
+* **Twitter:** [@project_harbor](https://twitter.com/project_harbor)
+* **User Group:** Join Harbor user email group: [harbor-users@lists.cncf.io](https://lists.cncf.io/g/harbor-users) to get update of Harbor's news, features, releases, or to provide suggestion and feedback.
+* **Developer Group:** Join Harbor developer group: [harbor-dev@lists.cncf.io](https://lists.cncf.io/g/harbor-dev) for discussion on Harbor development and contribution.
+* **Slack:** Join Harbor's community for discussion and ask questions: [Cloud Native Computing Foundation](https://slack.cncf.io/), channel: [#harbor](https://cloud-native.slack.com/messages/harbor/) and [#harbor-dev](https://cloud-native.slack.com/messages/harbor-dev/)
 
-![image](https://github.com/user-attachments/assets/d8b4064b-aa42-40eb-84c7-8d7420f46780)
+## Demos
+
+* **[Live Demo](https://demo.goharbor.io)** - A demo environment with the latest Harbor stable build installed. For additional information please refer to [this page](https://goharbor.io/docs/latest/install-config/demo-server/).
+* **[Video Demos](https://github.com/goharbor/harbor/wiki/Video-demos-for-Harbor)** - Demos for Harbor features and continuously updated.
+
+## Partners and Users
+
+For a list of users, please refer to [ADOPTERS.md](ADOPTERS.md).
+
+## Security
+
+### Security Audit
+
+A third party security audit was performed by Cure53 in October 2019. You can see the full report [here](https://goharbor.io/docs/2.0.0/security/Harbor_Security_Audit_Oct2019.pdf).
+
+### Reporting security vulnerabilities
+
+If you've found a security related issue, a vulnerability, or a potential vulnerability in Harbor please let the [Harbor Security Team](mailto:cncf-harbor-security@lists.cncf.io) know with the details of the vulnerability. We'll send a confirmation
+email to acknowledge your report, and we'll send an additional email when we've identified the issue
+positively or negatively.
+
+For further details please see our complete [security release process](SECURITY.md).
+
+## License
+
+Harbor is available under the [Apache 2 license](LICENSE).
+
+This project uses open source components which have additional licensing terms.  The official docker images and licensing terms for these open source components can be found at the following locations:
+
+* Photon OS 1.0: [docker image](https://hub.docker.com/_/photon/), [license](https://github.com/vmware/photon/blob/master/COPYING)
+
+
+## Fossa Status
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgoharbor%2Fharbor.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgoharbor%2Fharbor?ref=badge_large)
