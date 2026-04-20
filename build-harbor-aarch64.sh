@@ -9,7 +9,8 @@ GIT_BRANCH="v2.14.2"
 # execute build command：Download harbor source code
 # cd harbor-arm
 git clone --branch ${GIT_BRANCH} https://github.com/goharbor/harbor.git
-sed -i "s#release-2.3.0#${GIT_BRANCH}#g" harbor/Makefile
+cd harbor
+sed -i "s#release-2.3.0#${GIT_BRANCH}#g" Makefile
 
 # compile redis
 make compile_redis
