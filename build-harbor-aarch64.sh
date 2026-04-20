@@ -1,20 +1,15 @@
 GIT_BRANCH="v2.14.2"
 
 # first step: clone harbor ARM code
-git clone https://github.com/alanpeng/harbor-arm.git
+# git clone https://github.com/alanpeng/harbor-arm.git
 
 # Replace dev-arm image tag
-sed -i "s#dev-arm#${GIT_BRANCH}-aarch64#g" harbor-arm/Makefile
+# sed -i "s#dev-arm#${GIT_BRANCH}-aarch64#g" harbor-arm/Makefile
 
 # execute build command：Download harbor source code
-cd harbor-arm
-git clone --branch ${GIT_BRANCH} https://github.com/goharbor/harbor.git src/github.com/goharbor/harbor
-cp -f ../harbor/Makefile src/github.com/goharbor/harbor/
-cp -f ../harbor/make/photon/Makefile src/github.com/goharbor/harbor/make/photon/
-cp -f ../harbor/make/photon/portal/Dockerfile src/github.com/goharbor/harbor/make/photon/portal/
-cp -f ../harbor/make/photon/registry/builder src/github.com/goharbor/harbor/make/photon/registry/
-cp -f ../harbor/make/photon/registry/redis.patch src/github.com/goharbor/harbor/make/photon/registry/
-cp -f ../harbor/src/portal/src/app/shared/components/about-dialog/about-dialog.component.html src/github.com/goharbor/harbor/src/portal/src/app/shared/components/about-dialog/
+# cd harbor-arm
+git clone --branch ${GIT_BRANCH} https://github.com/goharbor/harbor.git
+sed -i "s#release-2.3.0#${GIT_BRANCH}#g" harbor/Makefile
 
 # compile redis
 make compile_redis
